@@ -59,6 +59,7 @@ func main() {
 		c *certs.Cert
 	)
 	// there must be a better way!
+	// TODO: prometheus exporter
 	for _, s := range ingress.Items {
 		for p := range s.Spec.TLS {
 			for _, h := range s.Spec.TLS[p].Hosts {
