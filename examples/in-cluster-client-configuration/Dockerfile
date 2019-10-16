@@ -1,17 +1,26 @@
-# Copyright 2017 The Kubernetes Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# our builder image
+FROM golang:1.13.1-alpine AS builder
 
-FROM debian
-COPY ./app /app
-ENTRYPOINT /app
+# default app directory
+WORKDIR /go/src/app
+
+# copy-in our module info
+COPY go.mod go.sum /go/src/app/
+RUN go mod download
+
+# add our binary sources
+ADD . /go/src/app
+
+# build our binary
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-w -s -extldflags "-static"' -o /go/bin/app
+
+FROM gcr.io/distroless/static
+
+# copy our built binary
+COPY --from=builder --chown=nonroot /go/bin/app /app
+
+# run as unprivileged user
+USER nonroot
+
+ # command / entrypoint of container
+CMD ["/app"]
