@@ -40,7 +40,7 @@ func main() {
 	for {
 		// get pods in all the namespaces by omitting namespace
 		// Or specify namespace to get pods in particular namespace
-		pods, err := clientset.CoreV1().Pods("kube-system").List(metav1.ListOptions{})
+		pods, err := clientset.CoreV1().Pods("default").List(metav1.ListOptions{})
 		if err != nil {
 			panic(err.Error())
 		}
